@@ -92,28 +92,36 @@ func main() {
 var homePage = `
 <!doctype html>
 <head>
+<style>
+#container {
+	display: grid;
+	grid-template-columns: 400px 400px;
+}
+</style>
 </head>
 
 <body>
 
 <h1>Hello, Miss Kimberly's Class!</h1>
 
-<div id="red">
-The Red LED is {{.RedState}}
-<form action="/led/red/{{.NotRedState}}" method="post">
-<div class="button">
-  <button type="submit">Turn the Red LED {{.NotRedState}}</button>
-</div>
-</form>
+<div id="container">
+	<div id="red">
+		<h2>The Red LED is {{.RedState}}</h2>
+		<form action="/led/red/{{.NotRedState}}" method="post">
+		<div class="button">
+		  <button type="submit">Turn the Red LED {{.NotRedState}}</button>
+		</div>
+		</form>
+	</div>
 
-</div>
-<div id="green">
-The Green LED is {{.GreenState}}
-<form action="/led/green/{{.NotGreenState}}" method="post">
-<div class="button">
-  <button type="submit">Turn the Green LED {{.NotGreenState}}</button>
-</div>
-</form>
+	<div id="green">
+		<h2>The Green LED is {{.GreenState}}</h2>
+		<form action="/led/green/{{.NotGreenState}}" method="post">
+		<div class="button">
+		  <button type="submit">Turn the Green LED {{.NotGreenState}}</button>
+		</div>
+		</form>
+	</div>
 </div>
 
 </body>
