@@ -15,7 +15,7 @@ import (
 // https://godoc.org/gobot.io/x/gobot/platforms/firmata
 // https://godoc.org/gobot.io/x/gobot/drivers/gpio#LedDriver
 func main() {
-	a := firmata.NewAdaptor("/dev/tty.usbmodem146101")
+	a := firmata.NewAdaptor("/dev/tty.usbmodem144101")
 	a.Connect()
 
 	greenLED := gpio.NewLedDriver(a, "2")
@@ -41,12 +41,12 @@ func main() {
 			redLED.Off()
 			greenLED.On()
 
-			time.Sleep(time.Duration(ra.Intn(5)) * time.Second)
+			time.Sleep(time.Duration(2+ra.Intn(3)) * time.Second)
 
 			redLED.On()
 			greenLED.Off()
 
-			time.Sleep(time.Duration(ra.Intn(5)) * time.Second)
+			time.Sleep(time.Duration(1+ra.Intn(4)) * time.Second)
 		}
 	})
 
@@ -123,6 +123,7 @@ var homePage = `
 #container {
 	display: grid;
 	grid-template-columns: 400px 400px;
+	margin-bottom: 500px;
 }
 </style>
 </head>
@@ -150,6 +151,8 @@ var homePage = `
 		</form>
 	</div>
 </div>
+
+<a href="/play">Play Red Light Green Light</a>
 
 </body>
 </html>
