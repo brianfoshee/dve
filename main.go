@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strings"
@@ -10,6 +10,8 @@ import (
 	"gobot.io/x/gobot/platforms/firmata"
 )
 
+// https://godoc.org/gobot.io/x/gobot/platforms/firmata
+// https://godoc.org/gobot.io/x/gobot/drivers/gpio#LedDriver
 func main() {
 	a := firmata.NewAdaptor("/dev/tty.usbmodem144101")
 	a.Connect()
@@ -20,8 +22,38 @@ func main() {
 	greenLED.Start()
 	redLED.Start()
 
+	var homeTempl = template.Must(template.New("home").Parse(homePage))
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, html)
+		greenState := greenLED.State()
+		redState := redLED.State()
+
+		gs, rs, ngs, nrs := "Off", "Off", "On", "On"
+		if greenState {
+			gs = "On"
+			ngs = "Off"
+		}
+		if redState {
+			rs = "On"
+			nrs = "Off"
+		}
+
+		data := struct {
+			GreenState    string
+			NotGreenState string
+			RedState      string
+			NotRedState   string
+		}{
+			GreenState:    gs,
+			NotGreenState: ngs,
+			RedState:      rs,
+			NotRedState:   nrs,
+		}
+
+		err := homeTempl.Execute(w, data)
+		if err != nil {
+			log.Println("homeTempl execution error: ", err)
+		}
 	})
 
 	// path is /led/COLOR/{ON,OFF}
@@ -37,15 +69,15 @@ func main() {
 
 		switch color {
 		case "red":
-			if state == "on" {
+			if state == "On" {
 				redLED.On()
-			} else if state == "off" {
+			} else if state == "Off" {
 				redLED.Off()
 			}
 		case "green":
-			if state == "on" {
+			if state == "On" {
 				greenLED.On()
-			} else if state == "off" {
+			} else if state == "Off" {
 				greenLED.Off()
 			}
 		}
@@ -56,12 +88,34 @@ func main() {
 	http.ListenAndServe("127.0.0.1:8080", nil)
 }
 
-var html = `
+// TODO add forms with buttons to turn red and green on/off
+var homePage = `
 <!doctype html>
 <head>
 </head>
+
 <body>
-<h1>Hello Miss Kimberly's Class!</h1>
+
+<h1>Hello, Miss Kimberly's Class!</h1>
+
+<div id="red">
+The Red LED is {{.RedState}}
+<form action="/led/red/{{.NotRedState}}" method="post">
+<div class="button">
+  <button type="submit">Turn the Red LED {{.NotRedState}}</button>
+</div>
+</form>
+
+</div>
+<div id="green">
+The Green LED is {{.GreenState}}
+<form action="/led/green/{{.NotGreenState}}" method="post">
+<div class="button">
+  <button type="submit">Turn the Green LED {{.NotGreenState}}</button>
+</div>
+</form>
+</div>
+
 </body>
 </html>
 `
