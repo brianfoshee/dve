@@ -3,8 +3,10 @@ package main
 import (
 	"html/template"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 
 	"gobot.io/x/gobot/drivers/gpio"
 	"gobot.io/x/gobot/platforms/firmata"
@@ -13,7 +15,7 @@ import (
 // https://godoc.org/gobot.io/x/gobot/platforms/firmata
 // https://godoc.org/gobot.io/x/gobot/drivers/gpio#LedDriver
 func main() {
-	a := firmata.NewAdaptor("/dev/tty.usbmodem144101")
+	a := firmata.NewAdaptor("/dev/tty.usbmodem146101")
 	a.Connect()
 
 	greenLED := gpio.NewLedDriver(a, "2")
@@ -21,6 +23,32 @@ func main() {
 
 	greenLED.Start()
 	redLED.Start()
+
+	ra := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
+		// start red light green light
+		redLED.On()
+		greenLED.Off()
+
+		for i := 0; i < 20; i++ {
+			redLED.Toggle()
+			greenLED.Toggle()
+			time.Sleep(200 * time.Millisecond)
+		}
+
+		for {
+			redLED.Off()
+			greenLED.On()
+
+			time.Sleep(time.Duration(ra.Intn(5)) * time.Second)
+
+			redLED.On()
+			greenLED.Off()
+
+			time.Sleep(time.Duration(ra.Intn(5)) * time.Second)
+		}
+	})
 
 	var homeTempl = template.Must(template.New("home").Parse(homePage))
 
@@ -88,7 +116,6 @@ func main() {
 	http.ListenAndServe("127.0.0.1:8080", nil)
 }
 
-// TODO add forms with buttons to turn red and green on/off
 var homePage = `
 <!doctype html>
 <head>
