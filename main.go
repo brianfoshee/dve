@@ -15,7 +15,7 @@ import (
 // https://godoc.org/gobot.io/x/gobot/platforms/firmata
 // https://godoc.org/gobot.io/x/gobot/drivers/gpio#LedDriver
 func main() {
-	a := firmata.NewAdaptor("/dev/tty.usbmodem144101")
+	a := firmata.NewAdaptor("/dev/tty.usbmodem146101")
 	a.Connect()
 
 	greenLED := gpio.NewLedDriver(a, "2")
@@ -122,8 +122,11 @@ var homePage = `
 <style>
 #container {
 	display: grid;
-	grid-template-columns: 400px 400px;
+	/*grid-template-columns: 400px 400px;*/
 	margin-bottom: 500px;
+}
+#green {
+	margin-top: 50px;
 }
 </style>
 </head>
